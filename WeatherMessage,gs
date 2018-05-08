@@ -1,0 +1,59 @@
+//今日の天気メッセージ取得
+function getWeatherMessage(inputMessage){
+  inputMessage = inputMessage?inputMessage:'';
+  var date = 0;//今日
+  if(inputMessage.indexOf('明日') != -1){
+    date = 1;
+  }else if(inputMessage.indexOf('明後日') !=-1){
+    date = 2;
+  }
+  
+  var url =  "http://weather.livedoor.com/forecast/webservice/json/v1?city=110010";
+  var response = UrlFetchApp.fetch(url); 
+  var data=JSON.parse(response.getContentText())['forecasts'][date];
+  
+  return formatMessage(data);
+}
+
+function formatMessage(data){
+  //日付
+  var date = data['dateLabel'];
+  //晴れ、曇り、雨、そのたいろいろ
+  var status = data['telop']
+  //最高気温
+  var maxTemperature = data['temperature']['max']?data['temperature']['max']['celsius']:null;
+  
+  var message;
+  switch(status){
+    case '晴れ':
+      message = 'お天気は晴れですよ！';
+      if(maxTemperature){
+        message += '\n\r最高気温は'+maxTemperature+'℃って言ってました！';
+      }
+      break;
+      
+    case '曇り':
+      message = 'お天気、曇りだそうですよ';
+      if(maxTemperature){
+        message += '\n\r一番暖かくて'+maxTemperature+'℃ですって';
+      }
+      break;
+      
+    case '雨':
+      message = 'お天気は雨だそうです。傘が必須ですね';
+      if(maxTemperature){
+        message +='\n\r気温は'+maxTemperature+'℃ぐらいだそうです';
+      }
+      break;
+      
+    default:
+      message = date+status+'ですって！';
+      if(maxTemperature){
+        message += '\n\r気温'+maxTemperature+'℃ぐらいですかね、、、';
+      }
+  }
+  return message;
+  
+  
+  
+}
